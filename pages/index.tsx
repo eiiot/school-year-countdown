@@ -41,9 +41,9 @@ function calculateDuration() {
 
       if (dayOfWeek !== 0 && dayOfWeek !== 6) {
         if (now < startOfDay || now > endOfDay) {
-          duration += endOfDay - startOfDay;
+          duration += endOfDay.getTime() - startOfDay.getTime();
         } else {
-          duration += endOfDay - now;
+          duration += endOfDay.getTime() - now.getTime();
           now.setHours(15, 33, 0, 0);
         }
       }
