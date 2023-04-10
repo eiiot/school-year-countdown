@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 
 const formatter = new Intl.NumberFormat("en-US");
 
-// Font files can be colocated inside of `pages`
 const sentient = localFont({ src: "Sentient-Variable.ttf" });
 
 function calculateDuration() {
@@ -33,9 +32,16 @@ function calculateDuration() {
 
     if (!isExcludedDate) {
       const startOfDay = new Date(now);
-      startOfDay.setHours(dayOfWeek === 1 ? 10 : 8, 30, 0, 0); // 10am on Monday, 8:30am on other days
+
+      startOfDay.setHours(
+        dayOfWeek === 1 ? 10 : 8,
+        dayOfWeek === 1 ? 0 : 30,
+        0,
+        0
+      ); // 10am on Monday, 8:30am on other days
 
       const endOfDay = new Date(now);
+
       endOfDay.setHours(15, 33, 0, 0);
 
       if (dayOfWeek !== 0 && dayOfWeek !== 6) {
