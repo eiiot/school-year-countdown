@@ -79,7 +79,12 @@ function calculateDays() {
 
     if (!isExcludedDate) {
       const startOfDay = new Date(now);
-      startOfDay.setHours(dayOfWeek === 1 ? 10 : 8, 30, 0, 0); // 10am on Monday, 8:30am on other days
+      startOfDay.setHours(
+        dayOfWeek === 1 ? 10 : 8,
+        dayOfWeek === 1 ? 0 : 30,
+        0,
+        0
+      ); // 10am on Monday, 8:30am on other days
 
       const endOfDay = new Date(now);
       endOfDay.setHours(15, 33, 0, 0);
@@ -115,29 +120,35 @@ const inSchoolNow = () => {
     new Date("2023-05-29"),
   ];
 
+  if (now > endDate) {
+    return false;
+  }
+
   const dayOfWeek = now.getDay();
 
   const isExcludedDate = excludedDates.some((excludedDate) => {
     return now.toDateString() === excludedDate.toDateString();
   });
 
-  if (!isExcludedDate) {
-    const startOfDay = new Date(now);
-    startOfDay.setHours(dayOfWeek === 1 ? 10 : 8, 30, 0, 0); // 10am on Monday, 8:30am on other days
-
-    const endOfDay = new Date(now);
-    endOfDay.setHours(15, 33, 0, 0);
-
-    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-      if (now < startOfDay || now > endOfDay) {
-        return false;
-      } else {
-        return true;
-      }
-    }
+  if (isExcludedDate) {
+    return false;
   }
 
-  return false;
+  const startOfDay = new Date(now);
+  startOfDay.setHours(dayOfWeek === 1 ? 10 : 8, dayOfWeek === 1 ? 0 : 30, 0, 0); // 10am on Monday, 8:30am on other days
+
+  const endOfDay = new Date(now);
+  endOfDay.setHours(15, 33, 0, 0);
+
+  if (dayOfWeek == 0 || dayOfWeek == 6) {
+    return false;
+  }
+
+  if (now < startOfDay || now > endOfDay) {
+    return false;
+  } else {
+    return true;
+  }
 };
 
 export default function Home() {
