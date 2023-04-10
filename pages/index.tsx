@@ -180,11 +180,11 @@ export default function Home() {
         )}
       >
         <div className="flex flex-col space-y-2 items-center relative p-2 text-center">
-          <motion.h1 className="text-6xl overflow-hidden leading-none">
+          <motion.h1 className="text-4xl overflow-hidden leading-none">
             {formattedDays.split("").map((char, index) => {
               return (
                 <motion.span
-                  className="inline-block"
+                  className="inline-block text-6xl"
                   key={char + index}
                   initial={{ y: "1em" }}
                   animate={{ y: 0 }}
@@ -199,7 +199,7 @@ export default function Home() {
                 </motion.span>
               );
             })}{" "}
-            <span className="text-4xl">school days</span>
+            school days
           </motion.h1>
           <motion.h2 className="text-4xl overflow-hidden leading-none">
             {formattedHours.split("").map((char, index) => {
