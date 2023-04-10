@@ -8,29 +8,52 @@ const formatter = new Intl.NumberFormat("en-US");
 
 const sentient = localFont({ src: "Sentient-Variable.ttf" });
 
-function calculateDuration() {
-  const now = new Date();
+const schoolDay = (date: Date): boolean => {
   const endDate = new Date("2023-06-03T15:33:00-07:00");
   const excludedDates = [
-    new Date("2023-04-03"),
-    new Date("2023-04-04"),
-    new Date("2023-04-05"),
-    new Date("2023-04-06"),
-    new Date("2023-04-07"),
-    new Date("2023-05-15"),
-    new Date("2023-05-29"),
+    new Date("2023-05-15T12:00:00-07:00"),
+    new Date("2023-05-29T12:00:00-07:00"),
   ];
+
+  if (date > endDate) {
+    return false;
+  }
+
+  const dayOfWeek = date.getDay();
+
+  if (dayOfWeek === 0 || dayOfWeek === 6) {
+    return false;
+  }
+
+  const isExcludedDate = excludedDates.some((excludedDate) => {
+    const testDate = new Date(excludedDate).setHours(0, 0, 0, 0);
+    const dateToTest = new Date(date).setHours(0, 0, 0, 0);
+
+    if (testDate === dateToTest) {
+      return true;
+    }
+    return;
+  });
+
+  if (isExcludedDate) {
+    return false;
+  }
+
+  return true;
+};
+
+const calculateDuration = () => {
+  const now = new Date();
+  const endDate = new Date("2023-06-03T15:33:00-07:00");
 
   let duration = 0;
 
   while (now < endDate) {
-    const dayOfWeek = now.getDay();
+    const isSchoolDay = schoolDay(now);
 
-    const isExcludedDate = excludedDates.some((excludedDate) => {
-      return now.toDateString() === excludedDate.toDateString();
-    });
+    if (isSchoolDay) {
+      const dayOfWeek = now.getDay();
 
-    if (!isExcludedDate) {
       const startOfDay = new Date(now);
 
       startOfDay.setHours(
@@ -44,13 +67,10 @@ function calculateDuration() {
 
       endOfDay.setHours(15, 33, 0, 0);
 
-      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-        if (now < startOfDay || now > endOfDay) {
-          duration += endOfDay.getTime() - startOfDay.getTime();
-        } else {
-          duration += endOfDay.getTime() - now.getTime();
-          now.setHours(15, 33, 0, 0);
-        }
+      if (now < startOfDay || now > endOfDay) {
+        duration += endOfDay.getTime() - startOfDay.getTime();
+      } else {
+        duration += endOfDay.getTime() - now.getTime();
       }
     }
 
@@ -59,50 +79,19 @@ function calculateDuration() {
   }
 
   return duration;
-}
+};
 
 function calculateDays() {
   const now = new Date();
   const endDate = new Date("2023-06-03T15:33:00-07:00");
-  const excludedDates = [
-    new Date("2023-04-03"),
-    new Date("2023-04-04"),
-    new Date("2023-04-05"),
-    new Date("2023-04-06"),
-    new Date("2023-04-07"),
-    new Date("2023-05-15"),
-    new Date("2023-05-29"),
-  ];
 
   let days = 0;
 
   while (now < endDate) {
-    const dayOfWeek = now.getDay();
+    const isSchoolDay = schoolDay(now);
 
-    const isExcludedDate = excludedDates.some((excludedDate) => {
-      return now.toDateString() === excludedDate.toDateString();
-    });
-
-    if (!isExcludedDate) {
-      const startOfDay = new Date(now);
-      startOfDay.setHours(
-        dayOfWeek === 1 ? 10 : 8,
-        dayOfWeek === 1 ? 0 : 30,
-        0,
-        0
-      ); // 10am on Monday, 8:30am on other days
-
-      const endOfDay = new Date(now);
-      endOfDay.setHours(15, 33, 0, 0);
-
-      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-        if (now < startOfDay || now > endOfDay) {
-          days += 1;
-        } else {
-          days += 1;
-          now.setHours(15, 33, 0, 0);
-        }
-      }
+    if (isSchoolDay) {
+      days += 1;
     }
 
     now.setHours(now.getHours() + 24);
@@ -115,28 +104,10 @@ function calculateDays() {
 const inSchoolNow = () => {
   // returns a boolean if the current time is during school hours
   const now = new Date();
-  const endDate = new Date("2023-06-03T15:33:00-07:00");
-  const excludedDates = [
-    new Date("2023-04-03"),
-    new Date("2023-04-04"),
-    new Date("2023-04-05"),
-    new Date("2023-04-06"),
-    new Date("2023-04-07"),
-    new Date("2023-05-15"),
-    new Date("2023-05-29"),
-  ];
-
-  if (now > endDate) {
-    return false;
-  }
-
+  const isSchoolDay = schoolDay(now);
   const dayOfWeek = now.getDay();
 
-  const isExcludedDate = excludedDates.some((excludedDate) => {
-    return now.toDateString() === excludedDate.toDateString();
-  });
-
-  if (isExcludedDate) {
+  if (!isSchoolDay) {
     return false;
   }
 
@@ -158,10 +129,15 @@ const inSchoolNow = () => {
 };
 
 export default function Home() {
-  const duration = useMemo(() => calculateDuration(), []);
-  const days = useMemo(() => calculateDays(), []);
+  const [duration, setDuration] = useState(0);
+  const [days, setDays] = useState(0);
 
-  const [seconds, setSeconds] = useState(duration / 1000);
+  useEffect(() => {
+    setDuration(calculateDuration());
+    setDays(calculateDays());
+  }, []);
+
+  const seconds = Math.floor(duration / 1000);
   const [inSchool, setInSchool] = useState(inSchoolNow());
 
   const formattedSeconds = formatter.format(seconds);
@@ -176,7 +152,7 @@ export default function Home() {
 
     const interval = setInterval(() => {
       if (inSchoolNow()) {
-        setSeconds((seconds) => seconds - 1);
+        setDuration(duration - 1000);
         setInSchool(true);
       } else {
         setInSchool(false);
