@@ -26,13 +26,15 @@ const schoolDay = (date: Date): boolean => {
   }
 
   const isExcludedDate = excludedDates.some((excludedDate) => {
-    const testDate = new Date(excludedDate).setHours(0, 0, 0, 0);
-    const dateToTest = new Date(date).setHours(0, 0, 0, 0);
+    // test if days are the same
 
-    if (testDate === dateToTest) {
+    if (
+      date.getDate() === excludedDate.getDate() &&
+      date.getMonth() === excludedDate.getMonth() &&
+      date.getFullYear() === excludedDate.getFullYear()
+    ) {
       return true;
     }
-    return;
   });
 
   if (isExcludedDate) {
@@ -74,8 +76,8 @@ const calculateDuration = () => {
       }
     }
 
-    now.setHours(now.getHours() + 24);
-    now.setMinutes(0, 0, 0);
+    now.setHours(0, 0, 0, 0); // set time to midnight
+    now.setDate(now.getDate() + 1); // add one day
   }
 
   return duration;
