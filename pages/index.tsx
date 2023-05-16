@@ -3,6 +3,8 @@ import localFont from "next/font/local";
 import clsx from "clsx";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import ReactConfetti from "react-confetti";
+import { useWindowSize } from "usehooks-ts";
 
 const formatter = new Intl.NumberFormat("en-US");
 
@@ -48,6 +50,13 @@ const calculateDuration = () => {
   const now = new Date();
   const endDate = new Date("2023-06-03T15:33:00-07:00");
 
+  const customEnds = {
+    "5/30/2023": "12:40",
+    "5/31/2023": "12:40",
+    "6/1/2023": "12:40",
+    "6/2/2023": "12:30",
+  } as { [key: string]: string };
+
   let duration = 0;
 
   while (now < endDate) {
@@ -67,7 +76,17 @@ const calculateDuration = () => {
 
       const endOfDay = new Date(now);
 
-      endOfDay.setHours(15, 33, 0, 0);
+      if (customEnds[now.toLocaleDateString()]) {
+        // this is really hacky but I am lazy and this app will probably break in a year anyways
+        endOfDay.setHours(
+          +customEnds[now.toLocaleDateString()].split(":")[0],
+          +customEnds[now.toLocaleDateString()].split(":")[1],
+          0,
+          0
+        );
+      } else {
+        endOfDay.setHours(15, 33, 0, 0);
+      }
 
       if (now < startOfDay || now > endOfDay) {
         duration += endOfDay.getTime() - startOfDay.getTime();
@@ -133,6 +152,7 @@ const inSchoolNow = () => {
 export default function Home() {
   const [duration, setDuration] = useState(0);
   const [days, setDays] = useState(0);
+  const { width, height } = useWindowSize();
 
   useEffect(() => {
     setDuration(calculateDuration());
@@ -181,6 +201,7 @@ export default function Home() {
           sentient.className
         )}
       >
+        {duration <= 0 && <ReactConfetti width={width} height={height} />}
         <div className="flex flex-col space-y-2 items-center relative p-2 text-center">
           <motion.h1 className="text-4xl overflow-hidden leading-none">
             {formattedDays.split("").map((char, index) => {
