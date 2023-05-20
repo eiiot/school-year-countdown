@@ -10,13 +10,13 @@ const formatter = new Intl.NumberFormat("en-US");
 
 const sentient = localFont({ src: "Sentient-Variable.ttf" });
 
-const schoolDay = (date: Date): boolean => {
-  const endDate = new Date("2023-06-03T15:33:00-07:00");
-  const excludedDates = [
-    new Date("2023-05-15T12:00:00-07:00"),
-    new Date("2023-05-29T12:00:00-07:00"),
-  ];
+const endDate = new Date("2023-06-03T15:33:00-07:00");
+const excludedDates = [
+  new Date("2023-05-15T12:00:00-07:00"),
+  new Date("2023-05-29T12:00:00-07:00"),
+];
 
+const schoolDay = (date: Date): boolean => {
   if (date > endDate) {
     return false;
   }
@@ -48,7 +48,6 @@ const schoolDay = (date: Date): boolean => {
 
 const calculateDuration = () => {
   const now = new Date();
-  const endDate = new Date("2023-06-03T15:33:00-07:00");
 
   const customEnds = {
     "5/30/2023": "12:40",
@@ -104,7 +103,6 @@ const calculateDuration = () => {
 
 function calculateDays() {
   const now = new Date();
-  const endDate = new Date("2023-06-03T15:33:00-07:00");
 
   let days = 0;
 
@@ -288,7 +286,7 @@ export default function Home() {
             seconds
           </motion.h4>
 
-          {!inSchool && (
+          {!inSchool && duration > 0 && (
             <span className="text-sm text-neutral-400 pt-4">
               The timer only counts when school is in session.
             </span>
