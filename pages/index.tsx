@@ -1,8 +1,8 @@
-import Head from "next/head";
-import localFont from "next/font/local";
 import clsx from "clsx";
-import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import localFont from "next/font/local";
+import Head from "next/head";
+import { useEffect, useMemo, useState } from "react";
 import ReactConfetti from "react-confetti";
 import { useWindowSize } from "usehooks-ts";
 
@@ -10,7 +10,7 @@ const formatter = new Intl.NumberFormat("en-US");
 
 const sentient = localFont({ src: "Sentient-Variable.ttf" });
 
-const endDate = new Date("2023-06-03T15:33:00-07:00");
+const endDate = new Date("2023-06-02T12:30:00-07:00");
 const excludedDates = [
   new Date("2023-05-15T12:00:00-07:00"),
   new Date("2023-05-29T12:00:00-07:00"),
@@ -98,31 +98,10 @@ const calculateDuration = () => {
     now.setDate(now.getDate() + 1); // add one day
   }
 
-  return duration;
+  return Math.floor(duration / 1000) * 1000;
 };
 
-function calculateDays() {
-  const now = new Date();
-
-  let days = 0;
-
-  while (now < endDate) {
-    const isSchoolDay = schoolDay(now);
-
-    if (isSchoolDay) {
-      days += 1;
-    }
-
-    now.setHours(now.getHours() + 24);
-    now.setMinutes(0, 0, 0);
-  }
-
-  return days;
-}
-
-const inSchoolNow = () => {
-  // returns a boolean if the current time is during school hours
-  const now = new Date();
+const isInSchool = (now: Date) => {
   const isSchoolDay = schoolDay(now);
   const dayOfWeek = now.getDay();
 
@@ -133,8 +112,26 @@ const inSchoolNow = () => {
   const startOfDay = new Date(now);
   startOfDay.setHours(dayOfWeek === 1 ? 10 : 8, dayOfWeek === 1 ? 0 : 30, 0, 0); // 10am on Monday, 8:30am on other days
 
+  const customEnds = {
+    "5/30/2023": "12:40",
+    "5/31/2023": "12:40",
+    "6/1/2023": "12:40",
+    "6/2/2023": "12:30",
+  } as { [key: string]: string };
+
   const endOfDay = new Date(now);
-  endOfDay.setHours(15, 33, 0, 0);
+
+  if (customEnds[now.toLocaleDateString()]) {
+    // this is really hacky but I am lazy and this app will probably break in a year anyways
+    endOfDay.setHours(
+      +customEnds[now.toLocaleDateString()].split(":")[0],
+      +customEnds[now.toLocaleDateString()].split(":")[1],
+      0,
+      0
+    );
+  } else {
+    endOfDay.setHours(15, 33, 0, 0);
+  }
 
   if (dayOfWeek == 0 || dayOfWeek == 6) {
     return false;
@@ -147,40 +144,54 @@ const inSchoolNow = () => {
   }
 };
 
+function calculateDays() {
+  const now = new Date();
+
+  let days = 0;
+
+  while (now < endDate) {
+    const isSchoolDay = schoolDay(now);
+    const inSchoolDay = isInSchool(now);
+
+    if (isSchoolDay && !inSchoolDay) { days++; }
+
+
+    now.setHours(now.getHours() + 24);
+    now.setMinutes(0, 0, 0);
+
+  }
+  return days;
+}
+
 export default function Home() {
   const [duration, setDuration] = useState(0);
   const [days, setDays] = useState(0);
   const { width, height } = useWindowSize();
 
-  useEffect(() => {
-    setDuration(calculateDuration());
-    setDays(calculateDays());
-  }, []);
-
-  const seconds = Math.floor(duration / 1000);
-  const [inSchool, setInSchool] = useState(inSchoolNow());
+  const seconds = Math.ceil(duration / 1000);
+  const [inSchool, setInSchool] = useState(false);
 
   const formattedSeconds = formatter.format(seconds);
   const formattedMinutes = formatter.format(Math.floor(seconds / 60));
   const formattedHours = formatter.format(Math.floor(seconds / 60 / 60));
-  const formattedDays = formatter.format(days);
+  const formattedDays = days.toString();
 
   useEffect(() => {
-    if (duration <= 0) {
-      return;
-    }
+    setDuration(calculateDuration());
+    setDays(calculateDays());
+    setInSchool(isInSchool(new Date()));
+
+    // update timer
 
     const interval = setInterval(() => {
-      if (inSchoolNow()) {
-        setDuration(duration - 1000);
-        setInSchool(true);
-      } else {
-        setInSchool(false);
-      }
+      setInSchool(isInSchool(new Date()));
+      setDuration(calculateDuration());
+      setDays(calculateDays());
     }, 1000);
 
+
     return () => clearInterval(interval);
-  }, [duration]);
+  }, []);
 
   return (
     <>
@@ -195,11 +206,16 @@ export default function Home() {
       </Head>
       <main
         className={clsx(
-          "w-full h-screen bg-neutral-900 text-white flex flex-col space-y-2 text-4xl items-center justify-center",
+          "w-full h-screen bg-neutral-900 overflow-none text-white flex flex-col space-y-2 text-4xl items-center justify-center",
           sentient.className
         )}
       >
-        {duration <= 0 && <ReactConfetti width={width} height={height} />}
+        {duration <= 0 && <ReactConfetti width={width} height={height} style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          zIndex: 100,
+        }} />}
         <div className="flex flex-col space-y-2 items-center relative p-2 text-center">
           <motion.h1 className="text-4xl overflow-hidden leading-none">
             {formattedDays.split("").map((char, index) => {
