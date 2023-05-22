@@ -153,13 +153,16 @@ function calculateDays() {
     const isSchoolDay = schoolDay(now);
     const inSchoolDay = isInSchool(now);
 
+    console.log(now, isSchoolDay, inSchoolDay)
+
     if (isSchoolDay && !inSchoolDay) { days++; }
 
-
-    now.setHours(now.getHours() + 24);
+    // go to midnight of the next day
+    now.setDate(now.getDate() + 1);
+    now.setHours(0);
     now.setMinutes(0, 0, 0);
-
   }
+
   return days;
 }
 
