@@ -88,8 +88,10 @@ const calculateDuration = () => {
       }
 
       if (now < startOfDay || now > endOfDay) {
+        console.log("Adding", (endOfDay.getTime() - startOfDay.getTime()) / 1000 / 60 / 60, "for", now);
         duration += endOfDay.getTime() - startOfDay.getTime();
       } else {
+        console.log("Adding", (endOfDay.getTime() - now.getTime()) / 1000 / 60 / 60, "for", now);
         duration += endOfDay.getTime() - now.getTime();
       }
     }
@@ -97,6 +99,8 @@ const calculateDuration = () => {
     now.setHours(0, 0, 0, 0); // set time to midnight
     now.setDate(now.getDate() + 1); // add one day
   }
+
+  console.log("Total Hours", duration / 1000 / 60 / 60)
 
   return Math.floor(duration / 1000) * 1000;
 };
@@ -152,8 +156,6 @@ function calculateDays() {
   while (now < endDate) {
     const isSchoolDay = schoolDay(now);
     const inSchoolDay = isInSchool(now);
-
-    console.log(now, isSchoolDay, inSchoolDay)
 
     if (isSchoolDay && !inSchoolDay) { days++; }
 
@@ -239,7 +241,7 @@ export default function Home() {
                 </motion.span>
               );
             })}{" "}
-            school days
+            {days === 1 ? "day" : "days"}
           </motion.h1>
           <motion.h2 className="text-4xl overflow-hidden leading-none">
             {formattedHours.split("").map((char, index) => {
@@ -305,11 +307,13 @@ export default function Home() {
             seconds
           </motion.h4>
 
-          {!inSchool && duration > 0 && (
+          {!inSchool && duration > 0 ? (
             <span className="text-sm text-neutral-400 pt-4">
               The timer only counts when school is in session.
             </span>
-          )}
+          ) : (<span className="text-sm text-neutral-400 pt-4">
+            Duration only includes time in school.
+          </span>)}
           <span className="text-sm text-neutral-400">
             Made by{" "}
             <a
