@@ -208,6 +208,7 @@ export default function Home() {
           rel="icon"
           href="https://emojicdn.elk.sh/%F0%9F%95%B0%EF%B8%8F?style=apple"
         />
+        <script defer data-domain="countdown.bhs.sh" src="https://analytics.eliothertenstein.com/js/plausible.js"></script>
       </Head>
       <main
         className={clsx(
