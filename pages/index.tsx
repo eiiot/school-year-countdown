@@ -16,6 +16,13 @@ const excludedDates = [
   new Date("2023-05-29T12:00:00-07:00"),
 ];
 
+const customEnds = {
+  "5/30/2023": "12:55",
+  "5/31/2023": "12:40",
+  "6/1/2023": "12:40",
+  "6/2/2023": "12:30",
+} as { [key: string]: string };
+
 const schoolDay = (date: Date): boolean => {
   if (date > endDate) {
     return false;
@@ -48,13 +55,6 @@ const schoolDay = (date: Date): boolean => {
 
 const calculateDuration = () => {
   const now = new Date();
-
-  const customEnds = {
-    "5/30/2023": "12:40",
-    "5/31/2023": "12:40",
-    "6/1/2023": "12:40",
-    "6/2/2023": "12:30",
-  } as { [key: string]: string };
 
   let duration = 0;
 
@@ -115,13 +115,6 @@ const isInSchool = (now: Date) => {
 
   const startOfDay = new Date(now);
   startOfDay.setHours(dayOfWeek === 1 ? 10 : 8, dayOfWeek === 1 ? 0 : 30, 0, 0); // 10am on Monday, 8:30am on other days
-
-  const customEnds = {
-    "5/30/2023": "12:40",
-    "5/31/2023": "12:40",
-    "6/1/2023": "12:40",
-    "6/2/2023": "12:30",
-  } as { [key: string]: string };
 
   const endOfDay = new Date(now);
 
