@@ -10,17 +10,24 @@ const formatter = new Intl.NumberFormat("en-US");
 
 const sentient = localFont({ src: "Sentient-Variable.ttf" });
 
-const endDate = new Date("2023-06-02T12:30:00-07:00");
+const endDate = new Date("2024-05-31T12:40:00-07:00");
 const excludedDates = [
-  new Date("2023-05-15T12:00:00-07:00"),
-  new Date("2023-05-29T12:00:00-07:00"),
+  new Date("2024-02-16T12:00:00-07:00"),
+  new Date("2024-02-16T12:00:00-07:00"),
+  new Date("2024-04-01T12:00:00-07:00"),
+  new Date("2024-04-02T12:00:00-07:00"),
+  new Date("2024-04-03T12:00:00-07:00"),
+  new Date("2024-04-04T12:00:00-07:00"),
+  new Date("2024-04-05T12:00:00-07:00"),
+  new Date("2024-05-17T12:00:00-07:00"),
+  new Date("2024-05-27T12:00:00-07:00"),
 ];
 
 const customEnds = {
-  "5/30/2023": "12:55",
-  "5/31/2023": "12:40",
-  "6/1/2023": "12:40",
-  "6/2/2023": "12:30",
+  "5/28/2024": "12:40",
+  "5/29/2024": "12:40",
+  "5/30/2024": "12:40",
+  "5/31/2024": "12:40",
 } as { [key: string]: string };
 
 const schoolDay = (date: Date): boolean => {
@@ -70,7 +77,7 @@ const calculateDuration = () => {
         dayOfWeek === 1 ? 10 : 8,
         dayOfWeek === 1 ? 0 : 30,
         0,
-        0
+        0,
       ); // 10am on Monday, 8:30am on other days
 
       const endOfDay = new Date(now);
@@ -81,17 +88,27 @@ const calculateDuration = () => {
           +customEnds[now.toLocaleDateString()].split(":")[0],
           +customEnds[now.toLocaleDateString()].split(":")[1],
           0,
-          0
+          0,
         );
       } else {
         endOfDay.setHours(15, 33, 0, 0);
       }
 
       if (now < startOfDay || now > endOfDay) {
-        console.log("Adding", (endOfDay.getTime() - startOfDay.getTime()) / 1000 / 60 / 60, "for", now);
+        console.log(
+          "Adding",
+          (endOfDay.getTime() - startOfDay.getTime()) / 1000 / 60 / 60,
+          "for",
+          now,
+        );
         duration += endOfDay.getTime() - startOfDay.getTime();
       } else {
-        console.log("Adding", (endOfDay.getTime() - now.getTime()) / 1000 / 60 / 60, "for", now);
+        console.log(
+          "Adding",
+          (endOfDay.getTime() - now.getTime()) / 1000 / 60 / 60,
+          "for",
+          now,
+        );
         duration += endOfDay.getTime() - now.getTime();
       }
     }
@@ -100,7 +117,7 @@ const calculateDuration = () => {
     now.setDate(now.getDate() + 1); // add one day
   }
 
-  console.log("Total Hours", duration / 1000 / 60 / 60)
+  console.log("Total Hours", duration / 1000 / 60 / 60);
 
   return Math.floor(duration / 1000) * 1000;
 };
@@ -124,7 +141,7 @@ const isInSchool = (now: Date) => {
       +customEnds[now.toLocaleDateString()].split(":")[0],
       +customEnds[now.toLocaleDateString()].split(":")[1],
       0,
-      0
+      0,
     );
   } else {
     endOfDay.setHours(15, 33, 0, 0);
@@ -150,7 +167,9 @@ function calculateDays() {
     const isSchoolDay = schoolDay(now);
     const inSchoolDay = isInSchool(now);
 
-    if (isSchoolDay && !inSchoolDay) { days++; }
+    if (isSchoolDay && !inSchoolDay) {
+      days++;
+    }
 
     // go to midnight of the next day
     now.setDate(now.getDate() + 1);
@@ -187,7 +206,6 @@ export default function Home() {
       setDays(calculateDays());
     }, 1000);
 
-
     return () => clearInterval(interval);
   }, []);
 
@@ -195,26 +213,39 @@ export default function Home() {
     <>
       <Head>
         <title>BHS Countdown</title>
-        <meta name="description" content="Count down the seconds until the end of the 2022-2023 school year" />
+        <meta
+          name="description"
+          content="Count down the seconds until the end of the 2022-2023 school year"
+        />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link
           rel="icon"
           href="https://emojicdn.elk.sh/%F0%9F%95%B0%EF%B8%8F?style=apple"
         />
-        <script defer data-domain="countdown.bhs.sh" src="https://analytics.eliothertenstein.com/js/plausible.js"></script>
+        <script
+          defer
+          data-domain="countdown.bhs.sh"
+          src="https://analytics.eliothertenstein.com/js/plausible.js"
+        ></script>
       </Head>
       <main
         className={clsx(
           "w-full h-screen bg-neutral-900 overflow-none text-white flex flex-col space-y-2 text-4xl items-center justify-center",
-          sentient.className
+          sentient.className,
         )}
       >
-        {duration <= 0 && <ReactConfetti width={width} height={height} style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          zIndex: 100,
-        }} />}
+        {duration <= 0 && (
+          <ReactConfetti
+            width={width}
+            height={height}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              zIndex: 100,
+            }}
+          />
+        )}
         <div className="flex flex-col space-y-2 items-center relative p-2 text-center">
           <motion.h1 className="text-4xl overflow-hidden leading-none">
             {formattedDays.split("").map((char, index) => {
@@ -305,9 +336,11 @@ export default function Home() {
             <span className="text-sm text-neutral-400 pt-4">
               The timer only counts when school is in session.
             </span>
-          ) : (<span className="text-sm text-neutral-400 pt-4">
-            Duration only includes time in school.
-          </span>)}
+          ) : (
+            <span className="text-sm text-neutral-400 pt-4">
+              Duration only includes time in school.
+            </span>
+          )}
           <span className="text-sm text-neutral-400">
             Made by{" "}
             <a
