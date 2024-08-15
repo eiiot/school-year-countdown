@@ -2,9 +2,29 @@ import clsx from "clsx";
 import { motion } from "framer-motion";
 import localFont from "next/font/local";
 import Head from "next/head";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useLayoutEffect } from "react";
 import ReactConfetti from "react-confetti";
-import { useWindowSize } from "usehooks-ts";
+
+const useWindowSize = () => {
+  const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
+
+  const handleSize = () => {
+    setWindowSize({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+  };
+
+  useEffect(() => {
+    handleSize();
+
+    window.addEventListener("resize", handleSize);
+
+    return () => window.removeEventListener("resize", handleSize);
+  }, []);
+
+  return windowSize;
+};
 
 const formatter = new Intl.NumberFormat("en-US");
 
@@ -241,7 +261,6 @@ export default function Home() {
             style={{
               position: "absolute",
               top: 0,
-              left: 0,
               zIndex: 100,
             }}
           />
